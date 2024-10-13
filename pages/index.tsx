@@ -1,3 +1,4 @@
+import { useAuthenticator } from "@aws-amplify/ui-react";
 import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
@@ -6,6 +7,12 @@ const client = generateClient<Schema>();
 
 export default function App() {
   const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+    
+  const { signOut } = useAuthenticator();
+    
+  function deleteTodo(id: string) {
+    client.models.Todo.delete({ id })
+  }
 
   function listTodos() {
     client.models.Todo.observeQuery().subscribe({
@@ -29,7 +36,12 @@ export default function App() {
       <button onClick={createTodo}>+ new</button>
       <ul>
         {todos.map((todo) => (
-          <li key={todo.id}>{todo.content}</li>
+          <li
+            key={todo.id}
+            onClick={() => deleteTodo(todo.id)}
+          >
+            {todo.content}
+          </li>
         ))}
       </ul>
       <div>
@@ -39,6 +51,8 @@ export default function App() {
           Review next steps of this tutorial.
         </a>
       </div>
+
+      <button onClick={signOut}>Sign out</button>
     </main>
   );
 }
